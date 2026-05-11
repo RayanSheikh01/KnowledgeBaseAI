@@ -1,0 +1,25 @@
+# Python build/cache artifacts
+
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.coverage
+
+
+# Node/Next artifacts
+node_modules/
+.next/
+.vercel/
+
+# environment files
+.env
+.env.local
+*.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+implementation_plan.md
+plan.md

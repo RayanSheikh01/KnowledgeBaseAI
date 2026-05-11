@@ -1,12 +1,26 @@
-from sqlalchemy import Column, DateTime, Integer, String
+import uuid
+from datetime import datetime
 
-class Base(sqlalchemy.orm.declarative_base()):
-    __abstract__ = True
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    source_type = Column(String, index=True)
-    source_uri = Column(String, index=True)
-    content_hash = Column(String, index=True)
-    chunk_count = Column(Integer, default=0)
+from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-    created_at = Column(DateTime, default=datetime.utcnow, timezone=True)
+
+class Base(DeclarativeBase):
+    pass
+
+
+class DocumentRegistry(Base):
+    __tablename__ = "documents_registry"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    source_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    chunk_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

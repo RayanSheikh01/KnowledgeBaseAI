@@ -1,13 +1,13 @@
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_postgres import PGVector
+from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine
-from functools import lru_cache
 
 from app.config import get_settings
 
 settings = get_settings()
 
-_engine = create_async_engine(settings.database_url)
+_engine = create_async_engine(settings.database_url, poolclass=NullPool)
 
 
 def get_embeddings() -> GoogleGenerativeAIEmbeddings:
@@ -17,7 +17,6 @@ def get_embeddings() -> GoogleGenerativeAIEmbeddings:
     )
 
 
-@lru_cache()
 def get_vector_store() -> PGVector:
     # create_extension=False: the `vector` extension is created by Alembic
     # migration 0001. Letting PGVector re-issue it fails on asyncpg, which

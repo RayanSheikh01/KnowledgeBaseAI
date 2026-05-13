@@ -24,6 +24,10 @@ async def test_ingest_writes_registry_and_chunks():
 
     store = get_vector_store()
     try:
+        await store.adelete_collection()
+    except Exception:
+        pass
+    try:
         doc_id, chunk_count = await ingest_documents(docs, title, source_type, source_uri)
 
         async with SessionLocal() as session:
@@ -38,7 +42,9 @@ async def test_ingest_writes_registry_and_chunks():
         assert row.source_uri == source_uri
         assert row.chunk_count == chunk_count
 
-        stored = await store.asimilarity_search("test document", k=chunk_count)
+        stored = await store.asimilarity_search(
+            "test document", k=chunk_count, filter={"document_id": str(doc_id)}
+        )
         assert len(stored) == chunk_count
         for chunk in stored:
             assert chunk.metadata["document_id"] == str(doc_id)
@@ -60,6 +66,10 @@ async def test_ingest_duplicates_documents():
     source_uri = "duplicate.txt"
 
     store = get_vector_store()
+    try:
+        await store.adelete_collection()
+    except Exception:
+        pass
     try:
         doc_id_1, _ = await ingest_documents(docs, title, source_type, source_uri)
         doc_id_2, chunk_count_2 = await ingest_documents(docs, title, source_type, source_uri)

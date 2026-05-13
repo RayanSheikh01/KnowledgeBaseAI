@@ -4,13 +4,13 @@ from pydantic import BaseModel
 from app.rag.chain import build_naive_chain
 from app.api.auth import require_app_token
 
-chat_router = APIRouter(tags=["chat"])
+router = APIRouter(tags=["chat"])
 
 class ChatRequest(BaseModel):
     message: str
 
 
-@chat_router.post("/chat", dependencies=[Depends(require_app_token)])
+@router.post("/chat", dependencies=[Depends(require_app_token)])
 async def chat(request: ChatRequest):
     chain = build_naive_chain()
     try:

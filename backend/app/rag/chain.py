@@ -6,6 +6,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.config import get_settings
 from app.rag.store import get_vector_store
+from app.rag.retriever import get_hybrid_retriever
 
 
 SYSTEM_PROMPT = """You are a careful research assistant. Answer the user's question using ONLY the numbered context passages below. Cite each fact with the passage number in square brackets like [1] or [2]. If the context does not contain the answer, reply exactly: "I don't know based on the provided documents." Do not invent citations.
@@ -22,8 +23,8 @@ def get_llm() -> ChatGoogleGenerativeAI:
     )
 
 
-def build_naive_chain() -> Runnable:
-    retriever = get_vector_store().as_retriever(search_kwargs={"k": 3})
+def buidl_chain() -> Runnable:
+    retriever = get_hybrid_retriever(k=6)
 
     prompt = ChatPromptTemplate.from_messages(
         [

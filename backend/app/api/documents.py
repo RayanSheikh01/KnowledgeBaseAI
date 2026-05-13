@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from app.api.auth import require_app_token
 from app.db.models import DocumentRegistry
 from app.db.session import SessionLocal
+from app.rag.retriever import invalidate_bm25_cache
 
 
 
@@ -42,5 +43,6 @@ async def delete_document(document_id: str):
         )
         await session.delete(document)
         await session.commit()
+        invalidate_bm25_cache()
     return {"detail": "Document deleted"}
 

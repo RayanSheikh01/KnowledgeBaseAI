@@ -12,7 +12,7 @@ def load_bytes(data: bytes, filename: str) -> list[Document]:
     if filename.lower().endswith(".pdf"):
         return _load_pdf_bytes(data, filename)
 
-    text = data.decode("utf-8", errors="replace")2
+    text = data.decode("utf-8", errors="replace")
     return [
         Document(
             page_content=text,

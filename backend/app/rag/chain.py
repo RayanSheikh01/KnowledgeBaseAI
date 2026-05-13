@@ -23,7 +23,7 @@ def get_llm() -> ChatGoogleGenerativeAI:
     )
 
 
-def buidl_chain() -> Runnable:
+def build_chain() -> Runnable:
     retriever = get_hybrid_retriever(k=6)
 
     prompt = ChatPromptTemplate.from_messages(

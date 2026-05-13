@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app.rag.chain import buidl_chain
+from app.rag.chain import build_chain
 from app.api.auth import require_app_token
 
 router = APIRouter(tags=["chat"])
@@ -12,7 +12,7 @@ class ChatRequest(BaseModel):
 
 @router.post("/chat", dependencies=[Depends(require_app_token)])
 async def chat(request: ChatRequest):
-    chain = buidl_chain()
+    chain = build_chain()
     try:
         result = await chain.ainvoke({"input": request.message})
     except Exception as e:

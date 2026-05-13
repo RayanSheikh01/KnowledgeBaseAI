@@ -4,7 +4,7 @@ from sqlalchemy import delete
 
 from app.db.models import DocumentRegistry
 from app.db.session import SessionLocal
-from app.rag.chain import buidl_chain
+from app.rag.chain import build_chain
 from app.rag.ingestion import ingest_documents
 from app.rag.store import get_vector_store
 
@@ -31,7 +31,7 @@ async def test_chain_invokes_with_context():
     )
     assert chunk_count > 0
 
-    chain = buidl_chain()
+    chain = build_chain()
     result = await chain.ainvoke({"input": "How fast can a blue marlin swim?"})
 
     assert "context" in result

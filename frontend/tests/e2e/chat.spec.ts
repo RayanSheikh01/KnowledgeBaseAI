@@ -21,3 +21,5 @@ test('chat happy path with citation popover', async ({ page }) => {
 
   await expect(page.getByText(/Paris is the capital/).last()).toBeVisible();
 });
+
+

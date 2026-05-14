@@ -1,46 +1,46 @@
-import { ChatStreamEvent } from '@/types';
+import type { ChatStreamEvent } from './types';
 
+export async function* parseChatStream(
+  response: Response,
+): AsyncGenerator<ChatStreamEvent> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response has no body');
+  }
 
-export async function parseChatStream(response: Response): Promise<AsyncGenerator<ChatStreamEvent>> {
-    const reader = response.body?.getReader();
-    if (!reader) {
-        throw new Error('No response body');
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let sep = buffer.indexOf('\n\n');
+    while (sep !== -1) {
+      const frame = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      sep = buffer.indexOf('\n\n');
+
+      let eventName: string | null = null;
+      const dataLines: string[] = [];
+      for (const line of frame.split('\n')) {
+        if (line.startsWith('event:')) {
+          eventName = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+          dataLines.push(line.slice(5).replace(/^ /, ''));
+        }
+      }
+      if (!eventName || dataLines.length === 0) continue;
+
+      let payload: Record<string, unknown>;
+      try {
+        payload = JSON.parse(dataLines.join('\n'));
+      } catch {
+        continue;
+      }
+
+      yield { type: eventName, ...payload } as unknown as ChatStreamEvent;
     }
-
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    return (async function* () {
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-                break;
-            }
-            buffer += decoder.decode(value, { stream: true });
-
-            let lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-            for (const line of lines) {
-                if (line.trim() === '') {
-                    continue;
-                }
-                try {
-                    const event = JSON.parse(line) as ChatStreamEvent;
-                    yield event;
-                }
-                catch (error) {
-                    console.error('Error parsing stream event:', error);
-                }
-            }
-        }
-        if (buffer.trim() !== '') {
-            try {
-                const event = JSON.parse(buffer) as ChatStreamEvent;
-                yield event;
-            }
-            catch (error) {
-                console.error('Error parsing final stream event:', error);
-            }
-        }
-    })();
+  }
 }

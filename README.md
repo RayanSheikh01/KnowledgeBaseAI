@@ -2,6 +2,9 @@
 
 A personal document Q&A system. Ingest PDFs, Markdown/text, and web pages into a vector store, then chat with them — answers stream token-by-token with inline citations back to the source passages.
 
+![Dashboard Picture](dashboard.png)
+![Chat Picture](chat.png)
+
 ---
 
 ## How it works

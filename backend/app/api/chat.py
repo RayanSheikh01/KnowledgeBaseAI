@@ -53,12 +53,12 @@ async def chat(request: ChatRequest) -> StreamingResponse:
                         yield _sse("token", {"content": text})
 
             citations = []
-            for doc in retrieved_docs:
+            for idx, doc in enumerate(retrieved_docs):
                 meta = doc.metadata or {}
                 page = meta.get("page")
                 citations.append(
                     {
-                        "n": meta.get("chunk_index", 0),
+                        "n": idx + 1,
                         "document_id": str(meta.get("document_id", "")),
                         "source": meta.get("source"),
                         "snippet": _snippet(doc.page_content),

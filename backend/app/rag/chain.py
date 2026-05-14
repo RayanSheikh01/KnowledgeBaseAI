@@ -3,7 +3,7 @@ from langchain_classic.chains import create_history_aware_retriever, create_retr
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.runnables import Runnable, RunnableWithMessageHistory
+from langchain_core.runnables import Runnable, RunnableLambda, RunnableWithMessageHistory
 from langchain_core.runnables.config import run_in_executor
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_postgres import PostgresChatMessageHistory
@@ -79,7 +79,7 @@ def build_chain() -> Runnable:
         ]
     )
 
-    document_prompt = PromptTemplate.from_template("[{chunk_index}] {page_content}")
+    document_prompt = PromptTemplate.from_template("[{n}] {page_content}")
 
     history_aware_retriever = create_history_aware_retriever(
         llm=get_llm(),
@@ -87,11 +87,18 @@ def build_chain() -> Runnable:
         prompt=contextualize_prompt,
     )
 
+    def _renumber_docs(docs):
+        for i, doc in enumerate(docs):
+            doc.metadata["n"] = i + 1
+        return docs
+
+    numbered_retriever = history_aware_retriever | RunnableLambda(_renumber_docs)
+
     combine_docs = create_stuff_documents_chain(
         get_llm(), qa_prompt, document_prompt=document_prompt
     )
 
-    rag_chain = create_retrieval_chain(history_aware_retriever, combine_docs)
+    rag_chain = create_retrieval_chain(numbered_retriever, combine_docs)
 
     return RunnableWithMessageHistory(
         rag_chain,
